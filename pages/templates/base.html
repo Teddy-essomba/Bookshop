@@ -1,0 +1,29 @@
+{% load static %}
+<html>
+<head>
+    <title>Library</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+    <nav>
+        <a href="{% url 'book_list' %}">Books</a>
+
+        {% if user.is_authenticated %}
+            <span>Hello, {{ user.username }}!</span>
+            <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit">Log Out</button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}">Log In</a>
+            <a href="{% url 'register' %}">Register</a>
+        {% endif %}
+    </nav>
+
+    {% if user.is_staff %}
+        <a href="{% url 'add_book' %}">Add a New Book</a>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,12 @@
+<h1>All Books</h1>
+<ul>
+{% for book in books %}
+    <li>
+        <a href="{% url 'book_detail' book.id %}">
+            {{ book.title }}
+        </a>
+    </li>
+{% empty %}
+    <li>No books found.</li>
+{% endfor %}
+</ul>

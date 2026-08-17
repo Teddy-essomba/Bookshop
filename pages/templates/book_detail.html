@@ -1,0 +1,13 @@
+<h1>{{ book.title }}</h1>
+<p>By {{ book.author.name }}</p>
+
+
+{% if user.is_staff or book.added_by == user %}
+    <a href="{% url 'edit_book' book.id %}">Edit</a>
+    <a href="{% url 'delete_book' book.id %}">Delete</a>
+{% endif %}
+
+{% if book.added_by %}
+    <p class="meta">Added by {{ book.added_by.username }}</p>
+{% endif %}
+

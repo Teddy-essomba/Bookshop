@@ -1,0 +1,12 @@
+<h1>{{ author.name }}</h1>
+<p>Born: {{ author.birth_year }}</p>
+<p>Country: {{ author.country }}</p>
+
+<h2>Books</h2>
+<ul>
+{% for book in books %}
+    <li>{{ book.title }}</li>
+{% empty %}
+    <li>No books</li>
+{% endfor %}
+</ul>
