@@ -1,3 +1,12 @@
+{# ========================================================================== #}
+{# pages/templates/book_detail.html  |  Bookshop — file guide #}
+{# ========================================================================== #}
+{# One book: title, author, and who added it. #}
+{# Context: `book`. #}
+{# Shows Edit / Delete links only when the viewer is staff OR added the book - #}
+{# the template-side half of the ownership check. The view must repeat that check; #}
+{# hiding a link does not secure anything. #}
+{# ========================================================================== #}
 <h1>{{ book.title }}</h1>
 <p>By {{ book.author.name }}</p>
 

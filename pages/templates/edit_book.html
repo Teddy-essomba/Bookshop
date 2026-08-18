@@ -1,4 +1,12 @@
 {% extends 'base.html' %}
+{# ========================================================================== #}
+{# pages/templates/edit_book.html  |  Bookshop — file guide #}
+{# ========================================================================== #}
+{# Edit form. Identical to add_book.html except the view constructs the form with #}
+{# instance=book, which pre-fills the fields and updates that row instead of #}
+{# creating a new one. #}
+{# Context: `form` and `book`. #}
+{# ========================================================================== #}
 
 {% block content %}
 <h1>Edit: {{ book.title }}</h1>

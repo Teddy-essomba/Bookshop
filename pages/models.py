@@ -1,3 +1,29 @@
+# ==========================================================================
+# pages/models.py  |  Bookshop — file guide
+# ==========================================================================
+# The database schema. Each class is a table, each attribute is a column, each
+# instance is a row. Django's ORM turns these into SQL so we never write it.
+#
+#   Author            name, birth_year, country
+#   Book              title, year_published, category (default "general")
+#                     -> author    FK Author, on_delete=CASCADE
+#                                  (delete an author and their books go too)
+#                     -> added_by  FK User, on_delete=SET_NULL, null=True
+#                                  (a user can leave without deleting their books;
+#                                   this is the field ownership checks read)
+#   ReadingListItem   one user's saved book - notes, priority, added_at
+#                     unique_together ('user', 'book')  -> can't save a book twice
+#                     ordering ['-priority', '-added_at'] -> default sort order
+#                     related_name='reading_list' -> user.reading_list.all()
+#
+# __str__ on each model is what the admin and the shell display; without it you
+# just see "Book object (1)".
+#
+# AFTER ANY CHANGE IN THIS FILE:
+#     python manage.py makemigrations
+#     python manage.py migrate
+# ==========================================================================
+
 from django.db import models
 from django.contrib.auth.models import User
 

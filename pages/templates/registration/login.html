@@ -1,4 +1,12 @@
 {% extends 'base.html' %}
+{# ========================================================================== #}
+{# pages/templates/registration/login.html  |  Bookshop — file guide #}
+{# ========================================================================== #}
+{# Login page. Django's LoginView renders this automatically - the path #}
+{# templates/registration/login.html is fixed, not a choice. Django supplies the #}
+{# `form`; we just draw it. form.errors is set on a bad username/password. #}
+{# Reached at /accounts/login/ via include('django.contrib.auth.urls'). #}
+{# ========================================================================== #}
 
 {% block content %}
 <h1>Log In</h1>

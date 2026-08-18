@@ -1,3 +1,14 @@
+/*
+ * ==========================================================================
+ * pages/static/style.css  |  Bookshop — file guide
+ * ==========================================================================
+ * Stylesheet for the HTML pages. Loaded in base.html with
+ * {% load static %} + {% static 'style.css' %}.
+ * Lives in pages/static/, which Django finds automatically because 'pages' is in
+ * INSTALLED_APPS. Styles the body, the nav bar and its links.
+ * ==========================================================================
+ */
+
 body {
     font-family: Arial, sans-serif;
     padding: 20px;

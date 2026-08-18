@@ -1,3 +1,10 @@
+# ==========================================================================
+# myproject/asgi.py  |  Bookshop — file guide
+# ==========================================================================
+# ASGI entry point - the async equivalent of wsgi.py, used by servers like
+# uvicorn/daphne and needed for websockets. Not used in dev; rarely edited.
+# ==========================================================================
+
 """
 ASGI config for myproject project.
 

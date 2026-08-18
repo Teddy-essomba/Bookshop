@@ -1,3 +1,9 @@
+{# ========================================================================== #}
+{# pages/templates/author_detail.html  |  Bookshop — file guide #}
+{# ========================================================================== #}
+{# One author plus every book they wrote. #}
+{# Context: `author` and `books` (from Book.objects.filter(author=author)). #}
+{# ========================================================================== #}
 <h1>{{ author.name }}</h1>
 <p>Born: {{ author.birth_year }}</p>
 <p>Country: {{ author.country }}</p>

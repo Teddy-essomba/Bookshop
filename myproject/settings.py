@@ -1,3 +1,40 @@
+# ==========================================================================
+# myproject/settings.py  |  Bookshop — file guide
+# ==========================================================================
+# The configuration centre for the whole project. Nothing here runs on its own -
+# Django reads it once at startup and every other file behaves accordingly.
+#
+# What is switched on, and where it comes from:
+#
+#   INSTALLED_APPS       corsheaders + Django's built-ins + rest_framework +
+#                        drf_spectacular + our own 'pages' app.
+#   MIDDLEWARE           CorsMiddleware sits at the top (order matters - it must
+#                        run before CommonMiddleware or the CORS headers never
+#                        get attached).
+#   DATABASES            SQLite, file db.sqlite3 in the project root.
+#   TEMPLATES            APP_DIRS=True, so Django finds pages/templates/ on its own.
+#   LOGIN_REDIRECT_URL   URL *names* used after login / logout, and the page
+#   LOGOUT_REDIRECT_URL  @login_required bounces anonymous users to.
+#   LOGIN_URL
+#   REST_FRAMEWORK       DRF defaults: every endpoint requires authentication
+#                        unless the view overrides it, JWT is the auth method,
+#                        drf-spectacular generates the OpenAPI schema.
+#   SIMPLE_JWT           Access token 15 min, refresh 7 days, rotate on refresh.
+#   SPECTACULAR_SETTINGS Title/description for /api/docs/ + the Bearer auth
+#                        scheme so Swagger's "Authorize" button works.
+#   CORS_ALLOWED_ORIGINS http://localhost:5173 - the Vite dev server for the
+#                        React frontend.
+#
+# KNOWN ISSUES (see the notes doc):
+#   * LOGIN_REDIRECT_URL / LOGOUT_REDIRECT_URL point at the URL name 'book_list',
+#     which no longer exists in pages/urls.py -> logging in raises NoReverseMatch.
+#   * 'django.middleware.common.CommonMiddleware' is listed twice - harmless,
+#     but delete the second one.
+#   * SIMPLE_JWT sets BLACKLIST_AFTER_ROTATION = True, but
+#     'rest_framework_simplejwt.token_blacklist' is not in INSTALLED_APPS, so
+#     old refresh tokens are never actually invalidated.
+# ==========================================================================
+
 """
 Django settings for myproject project.
 

@@ -1,3 +1,48 @@
+# ==========================================================================
+# pages/views.py  |  Bookshop — file guide
+# ==========================================================================
+# All the API endpoints. Every view here is a DRF ViewSet, so one class gives us
+# six actions - list, create, retrieve, update, partial_update, destroy - and the
+# router in pages/urls.py generates the URLs.
+#
+#   CustomTokenObtainPairView   POST /api/token/ - swaps username+password for a
+#                               JWT pair, using the custom serializer that packs
+#                               username/email/is_staff into the token.
+#                               (Currently unreachable - see myproject/urls.py.)
+#
+#   AuthorViewSet               /api/authors/  - full CRUD on Author.
+#                               IsAuthenticatedOrReadOnly: anyone can read,
+#                               only logged-in users can write.
+#
+#   BookViewSet                 /api/books/    - full CRUD on Book, same
+#                               permission. get_queryset() adds optional filters
+#                               from the query string:
+#                                   ?title=hobbit   icontains match
+#                                   ?author=3       by author id
+#                                   ?year=1937      by publication year
+#                                   ?category=scifi exact match
+#                               The @extend_schema_view decorator above the class
+#                               is purely documentation - it's what fills in the
+#                               summaries you see at /api/docs/.
+#
+#   ReadingListViewSet          Row-level security: get_queryset() returns only
+#                               the requesting user's items, and perform_create()
+#                               stamps user=request.user so the client can never
+#                               claim someone else's row. Backed by the IsOwner
+#                               permission in permissions.py for direct-by-id
+#                               access.
+#
+# KNOWN ISSUES:
+#   * The ?year= filter uses .filter(year=year) but the model field is
+#     year_published -> any request with ?year= raises FieldError (500).
+#   * ReadingListViewSet is never registered on the router in pages/urls.py, so
+#     /api/reading-list/ currently 404s.
+#   * `from django.shortcuts import render` is unused - the HTML page views
+#     (home, about, book_list, book_detail, book_search, author_detail, add_book,
+#     edit_book, register) that used to live here are gone. The templates in
+#     pages/templates/ are orphaned until they come back.
+# ==========================================================================
+
 # pages/views.py
 
 from rest_framework import viewsets

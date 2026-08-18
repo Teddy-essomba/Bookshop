@@ -1,4 +1,12 @@
 {% extends 'base.html' %}
+{# ========================================================================== #}
+{# pages/templates/add_book.html  |  Bookshop — file guide #}
+{# ========================================================================== #}
+{# Create-a-book form, rendered from BookForm with {{ form.as_p }}. #}
+{# Context: `form`. Posts back to the same URL; the view redirects on success #}
+{# (Post/Redirect/Get) so a refresh can't submit twice. #}
+{# {% csrf_token %} is mandatory - without it Django returns 403 Forbidden. #}
+{# ========================================================================== #}
 
 {% block content %}
 <h1>Add a New Book</h1>

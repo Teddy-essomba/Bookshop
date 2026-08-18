@@ -1,3 +1,18 @@
+{# ========================================================================== #}
+{# pages/templates/base.html  |  Bookshop — file guide #}
+{# ========================================================================== #}
+{# The site shell every other template inherits from. Holds the <head>, the stylesheet #}
+{# link, the nav bar, and two holes for children to fill: {% block content %} and #}
+{# the page title. #}
+{# Children start with {% extends 'base.html' %} and only what's inside a matching #}
+{# {% block %} is used - anything outside is silently ignored. #}
+{# Shows a Log Out form (POST, because logging out changes state) when #}
+{# user.is_authenticated, Log In / Register otherwise, and an "Add a New Book" #}
+{# link only for staff. #}
+{# NOTE: uses {% url 'book_list' %}, {% url 'register' %} and {% url 'add_book' %}, #}
+{# none of which exist in pages/urls.py any more - so this template currently #}
+{# raises NoReverseMatch. #}
+{# ========================================================================== #}
 {% load static %}
 <html>
 <head>

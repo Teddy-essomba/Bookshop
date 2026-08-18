@@ -1,3 +1,36 @@
+# ==========================================================================
+# pages/serializers.py  |  Bookshop — file guide
+# ==========================================================================
+# Serializers = the API's version of forms. They translate model instances to
+# JSON on the way out, and validate + build model instances on the way in.
+#
+#   CustomTokenObtainPairSerializer
+#       Adds username / email / is_staff as extra claims inside the JWT, so the
+#       React frontend can read them straight from the token instead of making a
+#       second request. (Wired to CustomTokenObtainPairView - which is currently
+#       shadowed; see myproject/urls.py.)
+#
+#   BookSerializer
+#       Exposes id, title, year_published, author, author_name.
+#       author       - writable, the Author's id (what a client POSTs)
+#       author_name  - read-only, pulled through the FK with source='author.name'
+#                      so clients get the name without a second request.
+#       validate_year_published()  field-level  -> year must be 1000..2100
+#       validate()                 cross-field  -> a book can't predate its author
+#
+#   AuthorSerializer         fields = '__all__' on Author.
+#   ReadingListItemSerializer  book_title read-only via source='book.title';
+#                              id and added_at are read-only.
+#
+# Mapping back to forms.py:  clean_<field>() -> validate_<field>()
+#                            clean()         -> validate()
+#                            and note the ValidationError here is DRF's, not
+#                            django.core.exceptions'.
+#
+# NOTE: BookSerializer leaves out `category` and `added_by`, both real fields on
+# Book - the API can currently neither read nor write them.
+# ==========================================================================
+
 # pages/serializers.py
 from rest_framework import serializers
 from .models import Author, Book, ReadingListItem

@@ -1,3 +1,12 @@
+{# ========================================================================== #}
+{# pages/templates/book_search.html  |  Bookshop — file guide #}
+{# ========================================================================== #}
+{# Search form + results. The form is method="get", so the term arrives as ?q=... #}
+{# and the view reads it with request.GET.get('q', '') - never request.GET['q'], #}
+{# which 500s when the parameter is missing. #}
+{# Context: `query` (echoed back into the input) and `books`. #}
+{# No {% csrf_token %} here, and that's correct: CSRF applies to POST, not GET. #}
+{# ========================================================================== #}
 <!DOCTYPE html>
 <html>
 <head>

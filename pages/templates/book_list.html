@@ -1,3 +1,10 @@
+{# ========================================================================== #}
+{# pages/templates/book_list.html  |  Bookshop — file guide #}
+{# ========================================================================== #}
+{# Lists every book, each linking to its detail page via {% url 'book_detail' book.id %}. #}
+{# Context: `books` (a QuerySet). {% empty %} covers the no-results case. #}
+{# NOTE: standalone - does not extend base.html, so it renders without the nav. #}
+{# ========================================================================== #}
 <h1>All Books</h1>
 <ul>
 {% for book in books %}

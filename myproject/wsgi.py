@@ -1,3 +1,11 @@
+# ==========================================================================
+# myproject/wsgi.py  |  Bookshop — file guide
+# ==========================================================================
+# WSGI entry point - the handle a production server (gunicorn, mod_wsgi, etc.)
+# grabs to serve this project synchronously. Not used by runserver in dev; you
+# almost never edit this file.
+# ==========================================================================
+
 """
 WSGI config for myproject project.
 
