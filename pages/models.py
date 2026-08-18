@@ -45,7 +45,15 @@ class Book(models.Model):
     year_published = models.IntegerField()
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     category = models.CharField(max_length=50, default="general")
-    added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    added_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL,
+        # null=True  -> the DATABASE column may be NULL (a user can be
+        #               deleted without taking their books with them).
+        # blank=True -> FORMS may leave it empty. Without this the admin's
+        #               "Add book" page refuses to save until you pick a
+        #               user, even though the column allows NULL.
+        null=True, blank=True,
+    )
 
 
     def __str__(self):

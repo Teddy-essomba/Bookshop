@@ -1,38 +1,32 @@
 # ==========================================================================
 # myproject/settings.py  |  Bookshop — file guide
 # ==========================================================================
-# The configuration centre for the whole project. Nothing here runs on its own -
-# Django reads it once at startup and every other file behaves accordingly.
+# The configuration centre for the whole project. Nothing here runs on its
+# own -- Django reads it once at startup and every other file behaves
+# accordingly.
 #
-# What is switched on, and where it comes from:
-#
-#   INSTALLED_APPS       corsheaders + Django's built-ins + rest_framework +
-#                        drf_spectacular + our own 'pages' app.
-#   MIDDLEWARE           CorsMiddleware sits at the top (order matters - it must
-#                        run before CommonMiddleware or the CORS headers never
-#                        get attached).
+#   INSTALLED_APPS       corsheaders, Django's built-ins, rest_framework,
+#                        drf_spectacular, simplejwt's token_blacklist, and
+#                        our own 'pages' app.
+#   MIDDLEWARE           CorsMiddleware first, then SecurityMiddleware.
+#                        Order is the order requests pass through.
 #   DATABASES            SQLite, file db.sqlite3 in the project root.
-#   TEMPLATES            APP_DIRS=True, so Django finds pages/templates/ on its own.
-#   LOGIN_REDIRECT_URL   URL *names* used after login / logout, and the page
-#   LOGOUT_REDIRECT_URL  @login_required bounces anonymous users to.
-#   LOGIN_URL
-#   REST_FRAMEWORK       DRF defaults: every endpoint requires authentication
-#                        unless the view overrides it, JWT is the auth method,
+#   TEMPLATES            APP_DIRS=True, so Django finds pages/templates/ by
+#                        itself. Nothing renders those templates any more --
+#                        they are kept as coursework from weeks 1-3.
+#   REST_FRAMEWORK       Endpoints require authentication unless the view
+#                        overrides it, JWT is the auth method, and
 #                        drf-spectacular generates the OpenAPI schema.
-#   SIMPLE_JWT           Access token 15 min, refresh 7 days, rotate on refresh.
-#   SPECTACULAR_SETTINGS Title/description for /api/docs/ + the Bearer auth
+#   SIMPLE_JWT           Access token 15 min, refresh 7 days, rotate and
+#                        blacklist on refresh.
+#   SPECTACULAR_SETTINGS Title/description for /api/docs/, plus the Bearer
 #                        scheme so Swagger's "Authorize" button works.
-#   CORS_ALLOWED_ORIGINS http://localhost:5173 - the Vite dev server for the
-#                        React frontend.
+#   CORS_ALLOWED_ORIGINS http://localhost:5173 -- the Vite dev server for the
+#                        React frontend (not built yet).
 #
-# KNOWN ISSUES (see the notes doc):
-#   * LOGIN_REDIRECT_URL / LOGOUT_REDIRECT_URL point at the URL name 'book_list',
-#     which no longer exists in pages/urls.py -> logging in raises NoReverseMatch.
-#   * 'django.middleware.common.CommonMiddleware' is listed twice - harmless,
-#     but delete the second one.
-#   * SIMPLE_JWT sets BLACKLIST_AFTER_ROTATION = True, but
-#     'rest_framework_simplejwt.token_blacklist' is not in INSTALLED_APPS, so
-#     old refresh tokens are never actually invalidated.
+# BEFORE DEPLOYING (week 12): DEBUG must be False, ALLOWED_HOSTS must list the
+# real host, and SECRET_KEY must come from an environment variable rather than
+# sitting in this file in version control.
 # ==========================================================================
 
 """
@@ -79,15 +73,19 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'drf_spectacular',
+    # Required for SIMPLE_JWT's BLACKLIST_AFTER_ROTATION to do anything.
+    # Without it, rotated refresh tokens stay valid forever.
+    'rest_framework_simplejwt.token_blacklist',
 
     "pages",
 
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # Add this at the very top
-    'django.middleware.common.CommonMiddleware',
-
+    # Order is the order requests pass through. CorsMiddleware must be above
+    # CommonMiddleware or the CORS headers never get attached; SecurityMiddleware
+    # belongs near the top so its headers apply to everything below it.
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -170,11 +168,11 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-
-LOGIN_REDIRECT_URL = 'book_list'
-LOGIN_URL = 'login'
-LOGOUT_REDIRECT_URL = 'book_list'
+# No LOGIN_REDIRECT_URL / LOGIN_URL / LOGOUT_REDIRECT_URL here on purpose.
+# Those are for Django's session-login views, which this project no longer
+# routes (see myproject/urls.py). Clients authenticate at /api/token/ with
+# JWT instead. They also pointed at the URL name 'book_list', which does not
+# exist -- that made the login page raise NoReverseMatch.
 
 
 # settings.py

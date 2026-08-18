@@ -1,52 +1,35 @@
 # ==========================================================================
 # pages/views.py  |  Bookshop — file guide
 # ==========================================================================
-# All the API endpoints. Every view here is a DRF ViewSet, so one class gives us
-# six actions - list, create, retrieve, update, partial_update, destroy - and the
-# router in pages/urls.py generates the URLs.
+# All the API endpoints. This project is backend-only: every view here is a
+# DRF ViewSet returning JSON, consumed by the React frontend (not built yet).
+# There are no HTML page views -- the files in pages/templates/ are kept as
+# coursework from weeks 1-3 but nothing renders them.
 #
-#   CustomTokenObtainPairView   POST /api/token/ - swaps username+password for a
-#                               JWT pair, using the custom serializer that packs
-#                               username/email/is_staff into the token.
-#                               (Currently unreachable - see myproject/urls.py.)
+#   CustomTokenObtainPairView   POST /api/token/
+#                               username + password -> JWT access/refresh pair,
+#                               with username/email/is_staff packed in.
 #
-#   AuthorViewSet               /api/authors/  - full CRUD on Author.
-#                               IsAuthenticatedOrReadOnly: anyone can read,
-#                               only logged-in users can write.
+#   AuthorViewSet               /api/authors/       full CRUD
+#                               IsAuthenticatedOrReadOnly: anyone reads,
+#                               only logged-in users write.
 #
-#   BookViewSet                 /api/books/    - full CRUD on Book, same
-#                               permission. get_queryset() adds optional filters
-#                               from the query string:
-#                                   ?title=hobbit   icontains match
-#                                   ?author=3       by author id
-#                                   ?year=1937      by publication year
-#                                   ?category=scifi exact match
-#                               The @extend_schema_view decorator above the class
-#                               is purely documentation - it's what fills in the
-#                               summaries you see at /api/docs/.
+#   BookViewSet                 /api/books/         full CRUD, same permission
+#                               filters: ?title= ?author= ?year= ?category=
+#                               perform_create() stamps added_by server-side.
 #
-#   ReadingListViewSet          Row-level security: get_queryset() returns only
-#                               the requesting user's items, and perform_create()
-#                               stamps user=request.user so the client can never
-#                               claim someone else's row. Backed by the IsOwner
-#                               permission in permissions.py for direct-by-id
-#                               access.
+#   ReadingListViewSet          /api/reading-list/  IsAuthenticated + IsOwner
+#                               row-level: you only ever see your own items.
 #
-# KNOWN ISSUES:
-#   * The ?year= filter uses .filter(year=year) but the model field is
-#     year_published -> any request with ?year= raises FieldError (500).
-#   * ReadingListViewSet is never registered on the router in pages/urls.py, so
-#     /api/reading-list/ currently 404s.
-#   * `from django.shortcuts import render` is unused - the HTML page views
-#     (home, about, book_list, book_detail, book_search, author_detail, add_book,
-#     edit_book, register) that used to live here are gone. The templates in
-#     pages/templates/ are orphaned until they come back.
+# One ModelViewSet = six actions (list, create, retrieve, update,
+# partial_update, destroy). The router in pages/urls.py builds the URLs, and
+# the @extend_schema_view decorators are documentation only -- they fill in
+# the summaries shown at /api/docs/.
 # ==========================================================================
-
-# pages/views.py
 
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework_simplejwt.views import TokenObtainPairView
 from drf_spectacular.utils import (
     extend_schema,
     extend_schema_view,
@@ -54,28 +37,38 @@ from drf_spectacular.utils import (
 )
 
 from .models import Author, Book, ReadingListItem
-from .serializers import AuthorSerializer, BookSerializer, ReadingListItemSerializer
-
-# pages/views.py
-from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import CustomTokenObtainPairSerializer
+from .serializers import (
+    AuthorSerializer,
+    BookSerializer,
+    ReadingListItemSerializer,
+    CustomTokenObtainPairSerializer,
+)
 from .permissions import IsOwner
-from django.shortcuts import render
 
 
-
-
-# Custom Token Claims. You can add extra data to your tokens by creating a custom serializer:
-
+# =========================================================================
+# JWT
+# =========================================================================
 
 class CustomTokenObtainPairView(TokenObtainPairView):
+    """
+    POST /api/token/ -- swaps username + password for an access/refresh pair.
+
+    Subclassed only to swap in our serializer, which packs username, email and
+    is_staff into the token so the frontend can read them without an extra
+    request.
+
+    This must be the ONLY view registered on 'api/token/' in myproject/urls.py.
+    Django stops at the first matching pattern, so a stock TokenObtainPairView
+    listed above this one would shadow it and the custom claims would silently
+    never appear.
+    """
     serializer_class = CustomTokenObtainPairSerializer
 
 
-
-# =========================
-# Author ViewSet
-# =========================
+# =========================================================================
+# Author
+# =========================================================================
 
 @extend_schema_view(
     list=extend_schema(
@@ -104,19 +97,18 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     ),
 )
 class AuthorViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for managing authors.
+    """Full CRUD on Author."""
 
-    Provides full CRUD functionality.
-    """
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
+    # Overrides the project-wide IsAuthenticated default in
+    # settings.REST_FRAMEWORK: anyone may read, only logged-in users may write.
     permission_classes = [IsAuthenticatedOrReadOnly]
 
 
-# =========================
-# Book ViewSet
-# =========================
+# =========================================================================
+# Book
+# =========================================================================
 
 @extend_schema_view(
     list=extend_schema(
@@ -170,19 +162,8 @@ class AuthorViewSet(viewsets.ModelViewSet):
         description="Removes a book from the system.",
     ),
 )
-
 class BookViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for managing books.
-
-    Provides:
-    - list
-    - create
-    - retrieve
-    - update
-    - partial_update
-    - destroy
-    """
+    """Full CRUD on Book, with optional query-string filtering."""
 
     queryset = Book.objects.all()
     serializer_class = BookSerializer
@@ -190,47 +171,74 @@ class BookViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Optionally filter books based on query parameters.
-        """
+        Narrow the list by query parameters,
+        e.g. /api/books/?title=hob&year=1937
 
+        Every keyword passed to .filter() must be a real model field name. A
+        typo is not caught at startup -- it raises FieldError (a 500) the first
+        time someone uses that parameter. The field is `year_published`, not
+        `year`, which is why the query parameter and the field name differ here.
+        """
         queryset = Book.objects.all()
 
-        # Filter by title
         title = self.request.query_params.get('title')
         if title:
             queryset = queryset.filter(title__icontains=title)
 
-        # Filter by author
         author_id = self.request.query_params.get('author')
         if author_id:
             queryset = queryset.filter(author_id=author_id)
 
-        # Filter by year
         year = self.request.query_params.get('year')
         if year:
-            queryset = queryset.filter(year=year)
+            queryset = queryset.filter(year_published=year)
 
-        # Filter by category
         category = self.request.query_params.get('category')
         if category:
             queryset = queryset.filter(category=category)
 
         return queryset
 
+    def perform_create(self, serializer):
+        """
+        Record who added the book, taken from the authenticated request rather
+        than from the request body -- a client must not be able to claim
+        someone else added it. `added_by` is read-only in the serializer for
+        the same reason.
+        """
+        serializer.save(added_by=self.request.user)
+
+
+# =========================================================================
+# Reading list — row-level security
+# =========================================================================
 
 class ReadingListViewSet(viewsets.ModelViewSet):
     """
-    ViewSet for user's personal reading list.
+    A user's private reading list.
 
-    Users can only see and modify their own reading list items.
+    Row-level security needs BOTH halves; neither is enough alone:
+        get_queryset()  stops other people's rows appearing in the list
+        IsOwner         stops someone fetching a row directly by its id
     """
+
     serializer_class = ReadingListItemSerializer
     permission_classes = [IsAuthenticated, IsOwner]
 
+    # The real queryset depends on who is asking, so it is built in
+    # get_queryset() below -- which always wins over this attribute. An empty
+    # placeholder is declared anyway so the router and drf-spectacular can see
+    # which model this viewset is for; without it the generated schema falls
+    # back to guessing. The explicit basename in urls.py is still required.
+    queryset = ReadingListItem.objects.none()
+
     def get_queryset(self):
-        """Filter to only show the current user's reading list."""
+        """Only ever the current user's items."""
         return ReadingListItem.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        """Automatically set the user when creating a reading list item."""
+        """
+        Set the owner server-side. Never trust the client to send `user` --
+        that is how someone writes a row onto somebody else's list.
+        """
         serializer.save(user=self.request.user)
