@@ -224,12 +224,7 @@ class ReadingListViewSet(viewsets.ModelViewSet):
 
     serializer_class = ReadingListItemSerializer
     permission_classes = [IsAuthenticated, IsOwner]
-
-    # The real queryset depends on who is asking, so it is built in
-    # get_queryset() below -- which always wins over this attribute. An empty
-    # placeholder is declared anyway so the router and drf-spectacular can see
-    # which model this viewset is for; without it the generated schema falls
-    # back to guessing. The explicit basename in urls.py is still required.
+    
     queryset = ReadingListItem.objects.none()
 
     def get_queryset(self):

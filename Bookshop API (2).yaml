@@ -1,0 +1,775 @@
+openapi: 3.0.3
+info:
+  title: Bookshop API
+  version: 1.0.0
+  description: API for managing books and authors in our bookshop
+paths:
+  /api/authors/:
+    get:
+      operationId: authors_list
+      description: Returns a list of all authors in the system.
+      summary: List all authors
+      tags:
+      - authors
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Author'
+          description: ''
+    post:
+      operationId: authors_create
+      description: Adds a new author to the database.
+      summary: Create a new author
+      tags:
+      - authors
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Author'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Author'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Author'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+          description: ''
+  /api/authors/{id}/:
+    get:
+      operationId: authors_retrieve
+      description: Returns details for a specific author by ID.
+      summary: Get author details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this author.
+        required: true
+      tags:
+      - authors
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+          description: ''
+    put:
+      operationId: authors_update
+      description: Completely replaces an author's data.
+      summary: Replace author
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this author.
+        required: true
+      tags:
+      - authors
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Author'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Author'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Author'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+          description: ''
+    patch:
+      operationId: authors_partial_update
+      description: Updates specific fields of an author.
+      summary: Update author fields
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this author.
+        required: true
+      tags:
+      - authors
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAuthor'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAuthor'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAuthor'
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+          description: ''
+    delete:
+      operationId: authors_destroy
+      description: Removes an author from the database.
+      summary: Delete author
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this author.
+        required: true
+      tags:
+      - authors
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/books/:
+    get:
+      operationId: books_list
+      description: Returns a list of all books in the bookshop.
+      summary: List all books
+      parameters:
+      - in: query
+        name: author
+        schema:
+          type: integer
+        description: Filter books by author ID
+      - in: query
+        name: category
+        schema:
+          type: string
+        description: Filter books by category
+      - in: query
+        name: title
+        schema:
+          type: string
+        description: Filter books by title (case-insensitive)
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: Filter books by publication year
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+          description: ''
+    post:
+      operationId: books_create
+      description: Adds a new book to the inventory.
+      summary: Add a new book
+      tags:
+      - books
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Book'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Book'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+          description: ''
+  /api/books/{id}/:
+    get:
+      operationId: books_retrieve
+      description: Returns details of a specific book.
+      summary: Get book details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this book.
+        required: true
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+          description: ''
+    put:
+      operationId: books_update
+      description: Completely replaces a book's data.
+      summary: Replace book
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this book.
+        required: true
+      tags:
+      - books
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Book'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Book'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+          description: ''
+    patch:
+      operationId: books_partial_update
+      description: Updates specific fields of a book.
+      summary: Update book fields
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this book.
+        required: true
+      tags:
+      - books
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBook'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBook'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBook'
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+          description: ''
+    delete:
+      operationId: books_destroy
+      description: Removes a book from the system.
+      summary: Delete book
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this book.
+        required: true
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/reading-list/:
+    get:
+      operationId: reading_list_list
+      description: |-
+        A user's private reading list.
+
+        Row-level security needs BOTH halves; neither is enough alone:
+            get_queryset()  stops other people's rows appearing in the list
+            IsOwner         stops someone fetching a row directly by its id
+      tags:
+      - reading-list
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReadingListItem'
+          description: ''
+    post:
+      operationId: reading_list_create
+      description: |-
+        A user's private reading list.
+
+        Row-level security needs BOTH halves; neither is enough alone:
+            get_queryset()  stops other people's rows appearing in the list
+            IsOwner         stops someone fetching a row directly by its id
+      tags:
+      - reading-list
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReadingListItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReadingListItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReadingListItem'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadingListItem'
+          description: ''
+  /api/reading-list/{id}/:
+    get:
+      operationId: reading_list_retrieve
+      description: |-
+        A user's private reading list.
+
+        Row-level security needs BOTH halves; neither is enough alone:
+            get_queryset()  stops other people's rows appearing in the list
+            IsOwner         stops someone fetching a row directly by its id
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this reading list item.
+        required: true
+      tags:
+      - reading-list
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadingListItem'
+          description: ''
+    put:
+      operationId: reading_list_update
+      description: |-
+        A user's private reading list.
+
+        Row-level security needs BOTH halves; neither is enough alone:
+            get_queryset()  stops other people's rows appearing in the list
+            IsOwner         stops someone fetching a row directly by its id
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this reading list item.
+        required: true
+      tags:
+      - reading-list
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReadingListItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReadingListItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReadingListItem'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadingListItem'
+          description: ''
+    patch:
+      operationId: reading_list_partial_update
+      description: |-
+        A user's private reading list.
+
+        Row-level security needs BOTH halves; neither is enough alone:
+            get_queryset()  stops other people's rows appearing in the list
+            IsOwner         stops someone fetching a row directly by its id
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this reading list item.
+        required: true
+      tags:
+      - reading-list
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedReadingListItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedReadingListItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedReadingListItem'
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadingListItem'
+          description: ''
+    delete:
+      operationId: reading_list_destroy
+      description: |-
+        A user's private reading list.
+
+        Row-level security needs BOTH halves; neither is enough alone:
+            get_queryset()  stops other people's rows appearing in the list
+            IsOwner         stops someone fetching a row directly by its id
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this reading list item.
+        required: true
+      tags:
+      - reading-list
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/token/:
+    post:
+      operationId: token_create
+      description: |-
+        POST /api/token/ -- swaps username + password for an access/refresh pair.
+
+        Subclassed only to swap in our serializer, which packs username, email and
+        is_staff into the token so the frontend can read them without an extra
+        request.
+
+        This must be the ONLY view registered on 'api/token/' in myproject/urls.py.
+        Django stops at the first matching pattern, so a stock TokenObtainPairView
+        listed above this one would shadow it and the custom claims would silently
+        never appear.
+      tags:
+      - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtainPair'
+        required: true
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomTokenObtainPair'
+          description: ''
+  /api/token/refresh/:
+    post:
+      operationId: token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+components:
+  schemas:
+    Author:
+      type: object
+      description: Author, read and write.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        birth_year:
+          type: integer
+        country:
+          type: string
+          maxLength: 50
+      required:
+      - birth_year
+      - country
+      - id
+      - name
+    Book:
+      type: object
+      description: Book, read and write.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        year_published:
+          type: integer
+        author:
+          type: integer
+        author_name:
+          type: string
+          readOnly: true
+        category:
+          type: string
+          maxLength: 50
+        added_by:
+          type: integer
+          readOnly: true
+      required:
+      - added_by
+      - author
+      - author_name
+      - id
+      - title
+      - year_published
+    CustomTokenObtainPair:
+      type: object
+      description: |-
+        Puts extra claims inside the access token.
+
+        By default the token only carries the user id, so the frontend would need
+        a second request just to display a username. These claims travel with the
+        token instead. Wired up by CustomTokenObtainPairView in views.py.
+      properties:
+        username:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - password
+      - username
+    PatchedAuthor:
+      type: object
+      description: Author, read and write.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        birth_year:
+          type: integer
+        country:
+          type: string
+          maxLength: 50
+    PatchedBook:
+      type: object
+      description: Book, read and write.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        year_published:
+          type: integer
+        author:
+          type: integer
+        author_name:
+          type: string
+          readOnly: true
+        category:
+          type: string
+          maxLength: 50
+        added_by:
+          type: integer
+          readOnly: true
+    PatchedReadingListItem:
+      type: object
+      description: |-
+        One book on a user's list.
+
+        `user` is deliberately absent from fields -- ReadingListViewSet sets it
+        from request.user, so a client cannot write onto someone else's list.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        book:
+          type: integer
+        book_title:
+          type: string
+          readOnly: true
+        added_at:
+          type: string
+          format: date-time
+          readOnly: true
+        notes:
+          type: string
+        priority:
+          type: integer
+    ReadingListItem:
+      type: object
+      description: |-
+        One book on a user's list.
+
+        `user` is deliberately absent from fields -- ReadingListViewSet sets it
+        from request.user, so a client cannot write onto someone else's list.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        book:
+          type: integer
+        book_title:
+          type: string
+          readOnly: true
+        added_at:
+          type: string
+          format: date-time
+          readOnly: true
+        notes:
+          type: string
+        priority:
+          type: integer
+      required:
+      - added_at
+      - book
+      - book_title
+      - id
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
