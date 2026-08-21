@@ -41,18 +41,43 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 from datetime import timedelta
 
+from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load key=value pairs from the .env file in the project root into the
+# environment. .env is listed in .gitignore and must never be committed;
+# .env.example documents which keys are needed, without their values.
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'uvsmbvslsxq_*5miz)2hyem+e@0(+j5ik5bew)8^s-f6sfp^*c'
+#
+# This key signs session cookies, password-reset links, and -- because
+# SIMPLE_JWT['SIGNING_KEY'] points at it further down -- every JWT this API
+# issues. Anyone holding it can forge all three, which is why it lives in .env
+# rather than in this file.
+#
+# A missing key is a hard failure, deliberately. Falling back to a default
+# would let the project boot in production with a publicly known key and
+# nobody would notice.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    raise ImproperlyConfigured(
+        "DJANGO_SECRET_KEY is not set. Copy .env.example to .env and add a key.\n"
+        "Generate one with:\n"
+        '  python -c "from django.core.management.utils import '
+        'get_random_secret_key; print(get_random_secret_key())"'
+    )
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

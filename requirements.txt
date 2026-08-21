@@ -10,3 +10,6 @@ djangorestframework-simplejwt==5.4.0
 
 # API Documentation
 drf-spectacular==0.28.0
+
+# Environment / secrets
+python-dotenv==1.0.1

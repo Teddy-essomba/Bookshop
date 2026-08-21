@@ -45,10 +45,22 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 
 pip install -r requirements.txt
 
+# Secrets live in .env, which is gitignored. Create it from the template
+# and generate a key:
+cp .env.example .env
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+# paste the output as the value of DJANGO_SECRET_KEY in .env
+
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
 ```
+
+### Environment variables
+
+| Variable | Required | Purpose |
+|---|---|---|
+| `DJANGO_SECRET_KEY` | yes | Signs session cookies, password-reset links and every JWT (`SIMPLE_JWT['SIGNING_KEY']` points at it). The app refuses to start without it — deliberately, so it can never boot with a default key by accident. |
 
 Then open **http://127.0.0.1:8000/api/docs/** for the interactive API browser.
 
@@ -255,8 +267,8 @@ its non-obvious decisions.
   would fix it.
 - **`token_blacklist_outstandingtoken` grows unbounded** — needs
   `manage.py flushexpiredtokens` on a schedule.
-- **Not deployment-ready** — `DEBUG=True`, empty `ALLOWED_HOSTS`, and
-  `SECRET_KEY` hardcoded rather than read from the environment.
+- **Not deployment-ready** — `DEBUG=True` and an empty `ALLOWED_HOSTS`.
+  (`SECRET_KEY` is already read from the environment.)
 - **`/api/docs/` is public**, appropriate for development only.
 
 ---
