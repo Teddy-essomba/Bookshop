@@ -18,6 +18,7 @@
 # ==========================================================================
 
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import Author, Book, ReadingListItem
@@ -105,13 +106,28 @@ class ReadingListItemSerializer(serializers.ModelSerializer):
     """
     One book on a user's list.
 
-    `user` is deliberately absent from fields -- ReadingListViewSet sets it
-    from request.user, so a client cannot write onto someone else's list.
+    `user` is a HiddenField: the client can neither set it nor see it, and it
+    is filled automatically from the authenticated request. That keeps a client
+    from writing onto someone else's list, while still putting `user` into
+    validated_data -- which UniqueTogetherValidator below needs in order to
+    check the model's unique_together constraint.
+
+    Without that validator the duplicate is only caught by the DATABASE, which
+    raises IntegrityError and returns a 500. Validating in the serializer turns
+    it into a proper 400 with a readable message.
     """
 
     book_title = serializers.CharField(source='book.title', read_only=True)
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = ReadingListItem
-        fields = ['id', 'book', 'book_title', 'added_at', 'notes', 'priority']
+        fields = ['id', 'user', 'book', 'book_title', 'added_at', 'notes', 'priority']
         read_only_fields = ['id', 'added_at']
+        validators = [
+            UniqueTogetherValidator(
+                queryset=ReadingListItem.objects.all(),
+                fields=['user', 'book'],
+                message='That book is already on your reading list.',
+            )
+        ]

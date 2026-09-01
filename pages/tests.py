@@ -184,3 +184,21 @@ class ReadingListTests(TestCase):
         )
         self.assertEqual(r.status_code, 201)
         self.assertEqual(ReadingListItem.objects.get(pk=r.data['id']).user, self.bob)
+
+    def test_cannot_save_the_same_book_twice(self):
+        self.login('alice')
+        r = self.client.post(
+            '/api/reading-list/',
+            {'book': self.book.id, 'notes': 'again', 'priority': 1},
+            format='json',
+
+        )
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(len(self.client.get('/api/reading-list/').data), 1)
+
+
+
+
+
+
+
