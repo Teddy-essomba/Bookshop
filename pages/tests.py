@@ -38,6 +38,7 @@ def claims_of(access_token):
 
 class BookAPITests(TestCase):
     def setUp(self):
+        # A fresh, unauthenticated client is initialized before every test case
         self.client = APIClient()
         self.user = User.objects.create_user('alice', 'a@example.com', 'pw12345!')
         self.author = Author.objects.create(
@@ -56,15 +57,18 @@ class BookAPITests(TestCase):
             format='json',
         )
         self.assertEqual(r.status_code, 200)
+        # Fixes the authorization header on the client for subsequent requests
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + r.data['access'])
         return r.data['access']
 
     def test_anyone_can_read_books(self):
+        # Verifies the GET endpoint is public (unauthenticated client can access)
         r = self.client.get('/api/books/')
         self.assertEqual(r.status_code, 200)
         self.assertEqual(len(r.data), 1)
 
     def test_anonymous_cannot_create(self):
+        # Verifies POST endpoint requires authentication
         r = self.client.post(
             '/api/books/',
             {'title': 'Dune', 'year_published': 1965, 'author': self.author.id},
@@ -90,9 +94,11 @@ class BookAPITests(TestCase):
             format='json',
         )
         self.assertEqual(r.status_code, 201)
+        # Proves the backend ignored 'added_by': 999 and used the request user instead
         self.assertEqual(Book.objects.get(pk=r.data['id']).added_by, self.user)
 
     def test_year_out_of_range_is_rejected(self):
+        # Validates custom business rules (min/max bounds check) in serializer
         self.auth()
         r = self.client.post(
             '/api/books/',
@@ -103,6 +109,7 @@ class BookAPITests(TestCase):
         self.assertIn('year_published', r.data)
 
     def test_book_cannot_predate_its_author(self):
+        # Validates cross-field dependency checks in backend validation
         self.auth()
         r = self.client.post(
             '/api/books/',
@@ -128,6 +135,7 @@ class TokenTests(TestCase):
             format='json',
         )
         self.assertEqual(r.status_code, 200)
+        # Decodes token payload to ensure extra user contexts are encoded directly inside it
         c = claims_of(r.data['access'])
         self.assertEqual(c['username'], 'bob')
         self.assertEqual(c['email'], 'b@example.com')
@@ -143,11 +151,13 @@ class ReadingListTests(TestCase):
         self.bob = User.objects.create_user('bob', 'b@example.com', 'pw12345!')
         author = Author.objects.create(name='A', birth_year=1900, country='IE')
         self.book = Book.objects.create(title='B', year_published=1950, author=author)
+        # Alice starts with 1 item in her list; Bob's list starts empty
         self.alice_item = ReadingListItem.objects.create(
             user=self.alice, book=self.book, notes='mine'
         )
 
     def login(self, username):
+        """Helper to switch active user contexts mid-test."""
         r = self.client.post(
             '/api/token/',
             {'username': username, 'password': 'pw12345!'},
@@ -164,13 +174,16 @@ class ReadingListTests(TestCase):
         self.assertEqual(self.client.get('/api/reading-list/').status_code, 401)
 
     def test_list_shows_only_your_own_items(self):
+        # Bob should see 0 items (row-level isolation verification)
         self.login('bob')
         self.assertEqual(len(self.client.get('/api/reading-list/').data), 0)
 
+        # Alice should see 1 item
         self.login('alice')
         self.assertEqual(len(self.client.get('/api/reading-list/').data), 1)
 
     def test_cannot_fetch_someone_elses_item_by_id(self):
+        # Blocks guessing individual asset IDs belonging to other users
         self.login('bob')
         r = self.client.get(f'/api/reading-list/{self.alice_item.id}/')
         self.assertIn(r.status_code, (403, 404))
@@ -186,19 +199,12 @@ class ReadingListTests(TestCase):
         self.assertEqual(ReadingListItem.objects.get(pk=r.data['id']).user, self.bob)
 
     def test_cannot_save_the_same_book_twice(self):
+        # Verifies unique-together constraint on user + book fields
         self.login('alice')
         r = self.client.post(
             '/api/reading-list/',
             {'book': self.book.id, 'notes': 'again', 'priority': 1},
             format='json',
-
         )
         self.assertEqual(r.status_code, 400)
         self.assertEqual(len(self.client.get('/api/reading-list/').data), 1)
-
-
-
-
-
-
-
